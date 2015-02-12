@@ -1,17 +1,27 @@
-# [InstantClick](http://instantclick.io/)
+This repo is a fork of [InstantClick](http://instantclick.io/) v3.1.0, by Alexandre Dieulot.
 
-## Contributing
+## Modifications
 
-Check out the [roadmap](http://instantclick.io/roadmap) to see what features need to be implemented.
+The official version of InstantClick replaces the entire document body, via `document.documentElement.replaceChild(<new body>, document.body)`.
 
-### Pull Requests
+This version allows you to specify a custom callback so you can do something like replace only a certain div and apply a fade transition.
 
-Look around the code to spot code convention (two spaces for tabs, no semicolons at the end of lines, etc.). I’ll need those to be respected to accept a pull request.
+Here is an example usage from [my personal site](http://www.joestrommen.com) that does exactly that:
 
-Adding a test to a pull request isn’t mandatory.
-
-### Tests
-
-Tests (in the `tests` folder) are PHP-generated HTML pages with which to check how InstantClick behaves on different browsers. That’s what I use before releasing a new version to make sure there are no obvious regressions.
-
-To access the suite of tests, run `php -S 127.0.0.1:8000` from the project’s root directory (**not** from the `tests` folder) and head to [http://127.0.0.1:8000/tests/](http://127.0.0.1:8000/tests/).
+    InstantClick.init(function (newBody) {
+        // Keep everything other than body-content intact
+        var newBodyContent = newBody.querySelectorAll('.body-content')[0];
+  
+        if (newBodyContent) {
+            var oldBodyContent = document.querySelectorAll('.body-content')[0];
+            var parent = oldBodyContent.parentElement;
+  
+            parent.replaceChild(newBodyContent, oldBodyContent);
+  
+            var opacity = window.getComputedStyle(newBody).opacity; // Force a re-calc
+            DomUtil.removeClass(newBodyContent, 'fade-in');
+        } else {
+            // No .body-content - perhaps it was an error page?  Show the entire thing.
+            document.documentElement.replaceChild(newBody, document.body)
+        }
+    });
